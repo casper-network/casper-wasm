@@ -568,4 +568,26 @@ mod tests {
 		let res = IndexMap::<String>::deserialize(1, &mut io::Cursor::new(invalid));
 		assert!(res.is_err());
 	}
+
+	#[test]
+	fn deserialize_with_capacity() {
+		let mut invalid = vec![];
+		VarUint32::from(u32::MAX).serialize(&mut invalid).unwrap();
+		VarUint32::from(5u32).serialize(&mut invalid).unwrap();
+		"fooba".to_string().serialize(&mut invalid).unwrap();
+		let _error = IndexMap::<String>::deserialize(6, &mut io::Cursor::new(invalid)).unwrap_err();
+	}
+
+	#[test]
+	fn very_large_idx() {
+		let mut invalid = vec![];
+		VarUint32::from(1u32).serialize(&mut invalid).unwrap();
+		VarUint32::from(u32::MAX - 1).serialize(&mut invalid).unwrap();
+		"fooba".to_string().serialize(&mut invalid).unwrap();
+		let indexmap =
+			IndexMap::<String>::deserialize(u32::MAX as usize, &mut io::Cursor::new(invalid))
+				.unwrap();
+		assert_eq!(indexmap.get(u32::MAX - 1), Some(&"fooba".to_string()));
+		assert_eq!(indexmap.len(), 1);
+	}
 }
