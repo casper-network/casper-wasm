@@ -1,139 +1,87 @@
 use crate::io;
-use alloc::vec::Vec;
+use alloc::collections::BTreeMap;
 
 use super::{Deserialize, Error, Serialize, VarUint32};
 
-use alloc::vec;
-use core::{
-	cmp::min,
-	iter::{FromIterator, IntoIterator},
-	mem, slice,
-};
+use core::iter::{FromIterator, IntoIterator};
 
 /// A map from non-contiguous `u32` keys to values of type `T`, which is
 /// serialized and deserialized ascending order of the keys. Normally used for
 /// relative dense maps with occasional "holes", and stored as an array.
-///
-/// **SECURITY WARNING:** This code is currently subject to a denial of service
-/// attack if you create a map containing the key `u32::MAX`, which should never
-/// happen in normal data. It would be pretty easy to provide a safe
-/// deserializing mechanism which addressed this problem.
 #[derive(Debug, Default)]
 pub struct IndexMap<T> {
-	/// The number of non-`None` entries in this map.
-	len: usize,
-
-	/// A vector of entries. Missing entries are represented as `None`.
-	entries: Vec<Option<T>>,
+	/// An ordered map of entries. Missing entries are represented as `None`.
+	entries: BTreeMap<u32, T>,
 }
 
 impl<T> IndexMap<T> {
+	/// Create an empty `IndexMap`.
+	pub fn new() -> IndexMap<T> {
+		IndexMap { entries: BTreeMap::new() }
+	}
+
 	/// Create an empty `IndexMap`, preallocating enough space to store
 	/// `capacity` entries without needing to reallocate the underlying memory.
-	pub fn with_capacity(capacity: usize) -> IndexMap<T> {
-		IndexMap { len: 0, entries: Vec::with_capacity(capacity) }
+	///
+	/// # Note
+	/// Currently, this method has no effect and is equivalent to [`IndexMap::new`] call.
+	#[deprecated]
+	pub fn with_capacity(_capacity: usize) -> IndexMap<T> {
+		Self::new()
 	}
 
 	/// Clear the map.
+	#[inline]
 	pub fn clear(&mut self) {
 		self.entries.clear();
-		self.len = 0;
 	}
 
 	/// Return the name for the specified index, if it exists.
+	#[inline]
 	pub fn get(&self, idx: u32) -> Option<&T> {
-		match self.entries.get(idx as usize) {
-			Some(&Some(ref value)) => Some(value),
-			Some(&None) | None => None,
-		}
+		self.entries.get(&idx)
 	}
 
 	/// Does the map contain an entry for the specified index?
+	#[inline]
 	pub fn contains_key(&self, idx: u32) -> bool {
-		match self.entries.get(idx as usize) {
-			Some(&Some(_)) => true,
-			Some(&None) | None => false,
-		}
+		self.entries.contains_key(&idx)
 	}
 
 	/// Insert a name into our map, returning the existing value if present.
-	///
-	/// Note: This API is designed for reasonably dense indices based on valid
-	/// data. Inserting a huge `idx` will use up a lot of RAM, and this function
-	/// will not try to protect you against that.
+	#[inline]
 	pub fn insert(&mut self, idx: u32, value: T) -> Option<T> {
-		let idx = idx as usize;
-		let result = if idx >= self.entries.len() {
-			// We need to grow the array, and add the new element at the end.
-			for _ in 0..(idx - self.entries.len()) {
-				// We can't use `extend(repeat(None)).take(n)`, because that
-				// would require `T` to implement `Clone`.
-				self.entries.push(None);
-			}
-			self.entries.push(Some(value));
-			debug_assert_eq!(idx + 1, self.entries.len());
-			self.len += 1;
-			None
-		} else {
-			// We're either replacing an existing element, or filling in a
-			// missing one.
-			let existing = self.entries[idx].take();
-			if existing.is_none() {
-				self.len += 1;
-			}
-			self.entries[idx] = Some(value);
-			existing
-		};
-		if mem::size_of::<usize>() > 4 {
-			debug_assert!(self.entries.len() <= (u32::max_value() as usize) + 1);
-		}
-		#[cfg(slow_assertions)]
-		debug_assert_eq!(self.len, self.slow_len());
-		result
+		self.entries.insert(idx, value)
 	}
 
 	/// Remove an item if present and return it.
+	#[inline]
 	pub fn remove(&mut self, idx: u32) -> Option<T> {
-		let result = match self.entries.get_mut(idx as usize) {
-			Some(value @ &mut Some(_)) => {
-				self.len -= 1;
-				value.take()
-			},
-			Some(&mut None) | None => None,
-		};
-		#[cfg(slow_assertions)]
-		debug_assert_eq!(self.len, self.slow_len());
-		result
+		self.entries.remove(&idx)
 	}
 
 	/// The number of items in this map.
+	#[inline]
 	pub fn len(&self) -> usize {
-		#[cfg(slow_assertions)]
-		debug_assert_eq!(self.len, self.slow_len());
-		self.len
+		self.entries.len()
 	}
 
 	/// Is this map empty?
+	#[inline]
 	pub fn is_empty(&self) -> bool {
-		self.len == 0
-	}
-
-	/// This function is only compiled when `--cfg slow_assertions` is enabled.
-	/// It computes the `len` value using a slow algorithm.
-	///
-	/// WARNING: This turns a bunch of O(n) operations into O(n^2) operations.
-	/// We may want to remove it once the code is tested, or to put it behind
-	/// a feature flag named `slow_debug_checks`, or something like that.
-	#[cfg(slow_assertions)]
-	fn slow_len(&self) -> usize {
-		self.entries.iter().filter(|entry| entry.is_some()).count()
+		self.entries.is_empty()
 	}
 
 	/// Create a non-consuming iterator over this `IndexMap`'s keys and values.
-	pub fn iter(&self) -> Iter<T> {
+	pub fn iter(&self) -> impl Iterator<Item = (u32, &T)> {
 		// Note that this does the right thing because we use `&self`.
-		self.into_iter()
+		self.entries.iter().map(|(k, v)| (*k, v))
 	}
+
+	// /// Create a consuming iterator over this `IndexMap`'s keys and values.
+	// pub fn into_iter(self) -> impl Iterator<Item = (u32, T)> {
+	// 	self.entries.into_iter()
+	// }
 
 	/// Custom deserialization routine.
 	///
@@ -154,7 +102,7 @@ impl<T> IndexMap<T> {
 		F: Fn(u32, &mut R) -> Result<T, Error>,
 	{
 		let len: u32 = VarUint32::deserialize(rdr)?.into();
-		let mut map = IndexMap::with_capacity(len as usize);
+		let mut map = IndexMap::new();
 		let mut prev_idx = None;
 		for _ in 0..len {
 			let idx: u32 = VarUint32::deserialize(rdr)?.into();
@@ -180,21 +128,13 @@ impl<T> IndexMap<T> {
 
 impl<T: Clone> Clone for IndexMap<T> {
 	fn clone(&self) -> IndexMap<T> {
-		IndexMap { len: self.len, entries: self.entries.clone() }
+		IndexMap { entries: self.entries.clone() }
 	}
 }
 
 impl<T: PartialEq> PartialEq<IndexMap<T>> for IndexMap<T> {
 	fn eq(&self, other: &IndexMap<T>) -> bool {
-		if self.len() != other.len() {
-			// If the number of non-`None` entries is different, we can't match.
-			false
-		} else {
-			// This is tricky, because one `Vec` might have a bunch of empty
-			// entries at the end which we want to ignore.
-			let smallest_len = min(self.entries.len(), other.entries.len());
-			self.entries[0..smallest_len].eq(&other.entries[0..smallest_len])
-		}
+		self.entries.eq(&other.entries)
 	}
 }
 
@@ -211,8 +151,7 @@ impl<T> FromIterator<(u32, T)> for IndexMap<T> {
 		I: IntoIterator<Item = (u32, T)>,
 	{
 		let iter = iter.into_iter();
-		let (lower, upper_opt) = iter.size_hint();
-		let mut map = IndexMap::with_capacity(upper_opt.unwrap_or(lower));
+		let mut map = IndexMap::new();
 		for (idx, value) in iter {
 			map.insert(idx, value);
 		}
@@ -220,89 +159,14 @@ impl<T> FromIterator<(u32, T)> for IndexMap<T> {
 	}
 }
 
-/// An iterator over an `IndexMap` which takes ownership of it.
-pub struct IntoIter<T> {
-	next_idx: u32,
-	remaining_len: usize,
-	iter: vec::IntoIter<Option<T>>,
-}
-
-impl<T> Iterator for IntoIter<T> {
-	type Item = (u32, T);
-
-	fn size_hint(&self) -> (usize, Option<usize>) {
-		(self.remaining_len, Some(self.remaining_len))
-	}
-
-	fn next(&mut self) -> Option<Self::Item> {
-		// Bail early if we know there are no more items. This also keeps us
-		// from repeatedly calling `self.iter.next()` once it has been
-		// exhausted, which is not guaranteed to keep returning `None`.
-		if self.remaining_len == 0 {
-			return None
-		}
-		for value_opt in &mut self.iter {
-			let idx = self.next_idx;
-			self.next_idx += 1;
-			if let Some(value) = value_opt {
-				self.remaining_len -= 1;
-				return Some((idx, value))
-			}
-		}
-		debug_assert_eq!(self.remaining_len, 0);
-		None
-	}
-}
-
 impl<T> IntoIterator for IndexMap<T> {
 	type Item = (u32, T);
-	type IntoIter = IntoIter<T>;
 
-	fn into_iter(self) -> IntoIter<T> {
-		IntoIter { next_idx: 0, remaining_len: self.len, iter: self.entries.into_iter() }
-	}
-}
+	type IntoIter = <BTreeMap<u32, T> as IntoIterator>::IntoIter;
 
-/// An iterator over a borrowed `IndexMap`.
-pub struct Iter<'a, T: 'static> {
-	next_idx: u32,
-	remaining_len: usize,
-	iter: slice::Iter<'a, Option<T>>,
-}
-
-impl<'a, T: 'static> Iterator for Iter<'a, T> {
-	type Item = (u32, &'a T);
-
-	fn size_hint(&self) -> (usize, Option<usize>) {
-		(self.remaining_len, Some(self.remaining_len))
-	}
-
-	fn next(&mut self) -> Option<Self::Item> {
-		// Bail early if we know there are no more items. This also keeps us
-		// from repeatedly calling `self.iter.next()` once it has been
-		// exhausted, which is not guaranteed to keep returning `None`.
-		if self.remaining_len == 0 {
-			return None
-		}
-		for value_opt in &mut self.iter {
-			let idx = self.next_idx;
-			self.next_idx += 1;
-			if let Some(ref value) = *value_opt {
-				self.remaining_len -= 1;
-				return Some((idx, value))
-			}
-		}
-		debug_assert_eq!(self.remaining_len, 0);
-		None
-	}
-}
-
-impl<'a, T: 'static> IntoIterator for &'a IndexMap<T> {
-	type Item = (u32, &'a T);
-	type IntoIter = Iter<'a, T>;
-
-	fn into_iter(self) -> Iter<'a, T> {
-		Iter { next_idx: 0, remaining_len: self.len, iter: self.entries.iter() }
+	#[inline]
+	fn into_iter(self) -> Self::IntoIter {
+		self.entries.into_iter()
 	}
 }
 
@@ -315,7 +179,7 @@ where
 
 	fn serialize<W: io::Write>(self, wtr: &mut W) -> Result<(), Self::Error> {
 		VarUint32::from(self.len()).serialize(wtr)?;
-		for (idx, value) in self {
+		for (idx, value) in self.entries.into_iter() {
 			VarUint32::from(idx).serialize(wtr)?;
 			value.serialize(wtr)?;
 		}
@@ -353,8 +217,8 @@ mod tests {
 	}
 
 	#[test]
-	fn with_capacity_creates_empty_map() {
-		let map = IndexMap::<String>::with_capacity(10);
+	fn new_creates_empty_map() {
+		let map = IndexMap::<String>::new();
 		assert!(map.is_empty());
 	}
 
