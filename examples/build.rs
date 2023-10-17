@@ -1,12 +1,12 @@
-// Simple example of how to use parity-wasm builder api.
+// Simple example of how to use casper-wasm builder api.
 // Builder api introduced as a method for fast generation of
 // different small wasm modules.
 
-extern crate parity_wasm;
+extern crate casper_wasm;
 
 use std::env;
 
-use parity_wasm::{builder, elements};
+use casper_wasm::{builder, elements};
 
 fn main() {
 	// Example binary accepts one parameter which is the output file
@@ -44,5 +44,5 @@ fn main() {
 		.build();
 
 	// Module structure can be serialzed to produce a valid wasm file
-	parity_wasm::serialize_to_file(&args[1], module).unwrap();
+	casper_wasm::serialize_to_file(&args[1], module).unwrap();
 }

@@ -1,11 +1,11 @@
-# parity-wasm
+# casper-wasm
+
+Note: This was forked from https://github.com/paritytech/parity-wasm as this repo is archived and has issues needing addressed.
+It is recommended that published version of 0.45.0 parity-wasm not be used.
 
 Low-level WebAssembly format library.
 
-[![Build Status](https://travis-ci.org/paritytech/parity-wasm.svg?branch=master)](https://travis-ci.org/paritytech/parity-wasm)
-[![crates.io link](https://img.shields.io/crates/v/parity-wasm.svg)](https://crates.io/crates/parity-wasm)
-
-[Documentation](https://docs.rs/parity-wasm)
+[Documentation](https://docs.rs/casper-wasm)
 
 ## Rust WebAssembly format serializing/deserializing
 
@@ -13,13 +13,13 @@ Add to Cargo.toml
 
 ```toml
 [dependencies]
-parity-wasm = "0.42"
+casper-wasm = "0.46"
 ```
 
 and then
 
 ```rust
-let module = parity_wasm::deserialize_file("./res/cases/v1/hello.wasm").unwrap();
+let module = casper_wasm::deserialize_file("./res/cases/v1/hello.wasm").unwrap();
 assert!(module.code_section().is_some());
 
 let code_section = module.code_section().unwrap(); // Part of the module with functions code
@@ -29,7 +29,7 @@ println!("Function count in wasm file: {}", code_section.bodies().len());
 
 ## Wabt Test suite
 
-`parity-wasm` supports full [wasm testsuite](https://github.com/WebAssembly/testsuite), running asserts that involves deserialization.
+`casper-wasm` supports full [wasm testsuite](https://github.com/WebAssembly/testsuite), running asserts that involves deserialization.
 
 To run testsuite:
 
@@ -51,12 +51,12 @@ in a `no_std` context, add the following to your `Cargo.toml` (still requires al
 
 ```toml
 [dependencies]
-parity-wasm = { version = "0.41", default-features = false }
+casper-wasm = { version = "0.46", default-features = false }
 ```
 
 ## License
 
-`parity-wasm` is primarily distributed under the terms of both the MIT
+`casper-wasm` is primarily distributed under the terms of both the MIT
 license and the Apache License (Version 2.0), at your choice.
 
 See LICENSE-APACHE, and LICENSE-MIT for details.

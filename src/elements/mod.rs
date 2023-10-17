@@ -89,7 +89,7 @@ pub trait Deserialize: Sized {
 }
 
 /// Serialization to serial i/o. Takes self by value to consume less memory
-/// (parity-wasm IR is being partially freed by filling the result buffer).
+/// (casper-wasm IR is being partially freed by filling the result buffer).
 pub trait Serialize {
 	/// Serialization error produced by serialization routine.
 	type Error: From<io::Error>;

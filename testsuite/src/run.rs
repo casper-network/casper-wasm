@@ -1,4 +1,4 @@
-use parity_wasm::elements::{deserialize_buffer, serialize, Module};
+use casper_wasm::elements::{deserialize_buffer, serialize, Module};
 use wast::{
 	parser::{parse, ParseBuffer},
 	QuoteModule, Wast, WastDirective,

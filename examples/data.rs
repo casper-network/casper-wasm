@@ -1,7 +1,7 @@
 // This short example provides the utility to inspect
 // wasm file data section.
 
-extern crate parity_wasm;
+extern crate casper_wasm;
 
 use std::env;
 
@@ -16,7 +16,7 @@ fn main() {
 
 	// Here we load module using dedicated for this purpose
 	// `deserialize_file` function (which works only with modules)
-	let module = parity_wasm::deserialize_file(&args[1]).expect("Failed to load module");
+	let module = casper_wasm::deserialize_file(&args[1]).expect("Failed to load module");
 
 	// We query module for data section. Note that not every valid
 	// wasm module must contain a data section. So in case the provided
