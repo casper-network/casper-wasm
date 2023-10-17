@@ -1,11 +1,11 @@
-extern crate parity_wasm;
+extern crate casper_wasm;
 
 use std::env;
 
-use parity_wasm::{builder, elements};
+use casper_wasm::{builder, elements};
 
 pub fn inject_nop(instructions: &mut elements::Instructions) {
-	use parity_wasm::elements::Instruction::*;
+	use casper_wasm::elements::Instruction::*;
 	let instructions = instructions.elements_mut();
 	let mut position = 0;
 	loop {
@@ -28,7 +28,7 @@ fn main() {
 		return
 	}
 
-	let mut module = parity_wasm::deserialize_file(&args[1]).unwrap();
+	let mut module = casper_wasm::deserialize_file(&args[1]).unwrap();
 
 	for section in module.sections_mut() {
 		if let elements::Section::Code(ref mut code_section) = *section {
@@ -44,5 +44,5 @@ fn main() {
 	);
 	let build = build.import().module("env").field("log").external().func(import_sig).build();
 
-	parity_wasm::serialize_to_file(&args[2], build.build()).unwrap();
+	casper_wasm::serialize_to_file(&args[2], build.build()).unwrap();
 }

@@ -1,6 +1,6 @@
-extern crate parity_wasm;
+extern crate casper_wasm;
 
-use parity_wasm::elements::Section;
+use casper_wasm::elements::Section;
 use std::env;
 
 fn main() {
@@ -10,7 +10,7 @@ fn main() {
 		return
 	}
 
-	let module = parity_wasm::deserialize_file(&args[1]).expect("Failed to load module");
+	let module = casper_wasm::deserialize_file(&args[1]).expect("Failed to load module");
 
 	println!("Module sections: {}", module.sections().len());
 

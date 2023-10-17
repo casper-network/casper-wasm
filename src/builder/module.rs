@@ -348,7 +348,7 @@ where
 	/// Import entry builder
 	/// # Examples
 	/// ```
-	/// use parity_wasm::builder::module;
+	/// use casper_wasm::builder::module;
 	///
 	/// let module = module()
 	///    .import()
@@ -379,8 +379,8 @@ where
 	/// Export entry builder
 	/// # Examples
 	/// ```
-	/// use parity_wasm::builder::module;
-	/// use parity_wasm::elements::Instruction::*;
+	/// use casper_wasm::builder::module;
+	/// use casper_wasm::elements::Instruction::*;
 	///
 	/// let module = module()
 	///    .global()
@@ -402,8 +402,8 @@ where
 	/// Glboal entry builder
 	/// # Examples
 	/// ```
-	/// use parity_wasm::builder::module;
-	/// use parity_wasm::elements::Instruction::*;
+	/// use casper_wasm::builder::module;
+	/// use casper_wasm::elements::Instruction::*;
 	///
 	/// let module = module()
 	///    .global()
@@ -544,7 +544,7 @@ where
 /// # Examples
 ///
 /// ```
-/// use parity_wasm::builder;
+/// use casper_wasm::builder;
 ///
 /// let module = builder::module()
 ///     .function()
