@@ -1,4 +1,4 @@
-extern crate parity_wasm;
+extern crate casper_wasm;
 
 use std::env;
 
@@ -9,7 +9,7 @@ fn main() {
 		return
 	}
 
-	let module = match parity_wasm::deserialize_file(&args[1])
+	let module = match casper_wasm::deserialize_file(&args[1])
 		.expect("Failed to load module")
 		.parse_names()
 		.and_then(|module| module.parse_reloc())
@@ -23,5 +23,5 @@ fn main() {
 		},
 	};
 
-	parity_wasm::serialize_to_file(&args[2], module).expect("Failed to write module");
+	casper_wasm::serialize_to_file(&args[2], module).expect("Failed to write module");
 }

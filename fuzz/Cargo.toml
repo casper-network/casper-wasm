@@ -13,7 +13,7 @@ cargo-fuzz = true
 [dependencies.binaryen]
 version = "0.3.0"
 
-[dependencies.parity-wasm]
+[dependencies.casper-wasm]
 path = ".."
 [dependencies.libfuzzer-sys]
 git = "https://github.com/rust-fuzz/libfuzzer-sys.git"
