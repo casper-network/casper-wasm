@@ -5,6 +5,7 @@ extern crate casper_wasm;
 
 use std::env;
 
+#[cfg(feature = "std")]
 fn main() {
 	// Example executable takes one argument which must
 	// refernce the existing file with a valid wasm module
@@ -41,4 +42,9 @@ fn main() {
 		// This shows the total length of the data segment in bytes.
 		println!("	size: {}", entry.value().len());
 	}
+}
+
+#[cfg(not(feature = "std"))]
+fn main() {
+	panic!("Compilation requires --feature std")
 }

@@ -284,7 +284,9 @@ impl Serialize for DataSegment {
 		}
 
 		let value = self.value;
-		VarUint32::from(value.len()).serialize(writer)?;
+		VarUint32::try_from(value.len())
+			.map_err(|_| Error::InvalidVarUint32)?
+			.serialize(writer)?;
 		writer.write(&value[..])?;
 		Ok(())
 	}

@@ -65,7 +65,10 @@ impl NameSection {
 
 impl NameSection {
 	/// Deserialize a name section.
-	pub fn deserialize<R: io::Read>(module: &Module, rdr: &mut R) -> Result<Self, Error> {
+	pub fn deserialize<R: io::Read + io::Seek>(
+		module: &Module,
+		rdr: &mut R,
+	) -> Result<Self, Error> {
 		let mut module_name: Option<ModuleNameSubsection> = None;
 		let mut function_names: Option<FunctionNameSubsection> = None;
 		let mut local_names: Option<LocalNameSubsection> = None;
@@ -98,10 +101,12 @@ impl NameSection {
 				},
 
 				_ => {
-					// Consume the entire subsection size and drop it. This allows other sections to still be
-					// consumed if there are any.
-					let mut buf = vec![0; size];
-					rdr.read(&mut buf)?;
+					let size: i64 = size.try_into().map_err(|_| Error::UnexpectedEof)?;
+					rdr.seek_relative(size)?;
+					// Behavior of seeking past the length is implementation defined
+					if rdr.stream_position()? > rdr.stream_len()? {
+						return Err(Error::UnexpectedEof);
+					}
 				},
 			};
 		}
@@ -120,7 +125,9 @@ impl Serialize for NameSection {
 			name_payload: &[u8],
 		) -> Result<(), Error> {
 			VarUint7::from(name_type).serialize(wtr)?;
-			VarUint32::from(name_payload.len()).serialize(wtr)?;
+			VarUint32::try_from(name_payload.len())
+				.map_err(|_| Error::InvalidVarInt32)?
+				.serialize(wtr)?;
 			wtr.write(name_payload).map_err(Into::into)
 		}
 
@@ -294,8 +301,7 @@ pub type NameMap = IndexMap<String>;
 
 #[cfg(test)]
 mod tests {
-	use std::io::Cursor;
-
+	use crate::alloc::{string::ToString, vec::Vec};
 	use crate::elements;
 
 	use super::*;
@@ -369,12 +375,10 @@ mod tests {
 
 		let module = Module::new(Vec::new());
 
-		let mut cur = Cursor::new(invalid.as_slice());
+		let mut cur = crate::io::Cursor::new(invalid.as_slice());
 
 		let result = NameSection::deserialize(&module, &mut cur);
-		assert!(
-			matches!(&result, Err(elements::Error::HeapOther(msg)) if msg == "I/O Error: Io(Error { kind: UnexpectedEof, message: \"failed to fill whole buffer\" })"),
-			"{result:?}"
-		);
+
+		assert!(matches!(&result, Err(elements::Error::UnexpectedEof)), "{result:?}");
 	}
 }

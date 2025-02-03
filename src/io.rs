@@ -18,6 +18,9 @@ pub enum Error {
 	/// Invalid data is encountered.
 	InvalidData,
 
+	/// Invalid input.
+	InvalidInput,
+
 	#[cfg(feature = "std")]
 	Io(std::io::Error),
 }
@@ -37,6 +40,15 @@ pub trait Read {
 	///
 	/// If there is not enough data in this read then `UnexpectedEof` will be returned.
 	fn read(&mut self, buf: &mut [u8]) -> Result<()>;
+}
+
+pub trait Seek {
+	/// Seeks relative to the current position in the stream.
+	fn seek_relative(&mut self, offset: i64) -> Result<()>;
+	/// Returns the current seek position from the start of the stream.
+	fn stream_position(&mut self) -> Result<u64>;
+	/// Returns the current length of this stream (in bytes).
+	fn stream_len(&mut self) -> Result<u64>;
 }
 
 /// Reader that saves the last position.
@@ -69,6 +81,22 @@ impl<T: AsRef<[u8]>> Read for Cursor<T> {
 	}
 }
 
+impl<T: AsRef<[u8]>> Seek for Cursor<T> {
+	fn seek_relative(&mut self, offset: i64) -> Result<()> {
+		let offset: usize = offset.try_into().map_err(|_| Error::InvalidInput)?;
+		self.pos = self.pos.checked_add(offset).ok_or(Error::InvalidInput)?;
+		Ok(())
+	}
+
+	fn stream_position(&mut self) -> Result<u64> {
+		self.pos.try_into().map_err(|_| Error::InvalidInput)
+	}
+
+	fn stream_len(&mut self) -> Result<u64> {
+		self.inner.as_ref().len().try_into().map_err(|_| Error::InvalidInput)
+	}
+}
+
 #[cfg(not(feature = "std"))]
 impl Write for alloc::vec::Vec<u8> {
 	fn write(&mut self, buf: &[u8]) -> Result<()> {
@@ -81,6 +109,24 @@ impl Write for alloc::vec::Vec<u8> {
 impl<T: io::Read> Read for T {
 	fn read(&mut self, buf: &mut [u8]) -> Result<()> {
 		self.read_exact(buf).map_err(Error::Io)
+	}
+}
+
+#[cfg(feature = "std")]
+impl<T: io::Seek> Seek for T {
+	fn seek_relative(&mut self, pos: i64) -> Result<()> {
+		self.seek_relative(pos).map_err(Error::Io)
+	}
+
+	fn stream_position(&mut self) -> Result<u64> {
+		self.stream_position().map_err(Error::Io)
+	}
+
+	fn stream_len(&mut self) -> Result<u64> {
+		let current_position = self.stream_position().map_err(Error::Io)?;
+		let end_pos = self.seek(std::io::SeekFrom::End(0)).map_err(Error::Io)?;
+		self.seek(std::io::SeekFrom::Start(current_position)).map_err(Error::Io)?;
+		Ok(end_pos)
 	}
 }
 
@@ -114,5 +160,16 @@ mod tests {
 		let mut cursor = Cursor::new(vec![0u8]);
 		let mut buf = [0, 1, 2];
 		assert!(cursor.read(&mut buf[..]).is_err());
+	}
+
+	#[test]
+	fn overflowing_seek() {
+		let mut cursor = Cursor::new(vec![0u8, 1, 2]);
+
+		// Seek past end works, it is impl dependent similar to the std crate.
+		cursor.seek_relative(i64::MAX).unwrap();
+		cursor.seek_relative(i64::MAX).unwrap();
+		// This should overflow usize
+		assert!(matches!(cursor.seek_relative(2).unwrap_err(), Error::InvalidInput));
 	}
 }

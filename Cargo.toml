@@ -12,13 +12,14 @@ keywords = ["wasm", "webassembly", "bytecode", "serde", "interpreter"]
 categories = ["wasm", "parser-implementations"]
 include = ["src/**/*", "LICENSE-*", "README.md"]
 edition = "2021"
-rust-version = "1.56.1"
+rust-version = "1.80.0"
 
 [workspace]
 members = ["testsuite"]
 
 [dev-dependencies]
-time = "0.3"
+hashbrown = "0.15.2"
+cfg-if = "1.0.0"
 
 [features]
 default = ["std"]

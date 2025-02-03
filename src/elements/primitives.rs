@@ -31,10 +31,13 @@ impl From<u32> for VarUint32 {
 	}
 }
 
-impl From<usize> for VarUint32 {
-	fn from(i: usize) -> VarUint32 {
-		assert!(i <= u32::max_value() as usize);
-		VarUint32(i as u32)
+pub struct TryFromUsizeForVarUint32(());
+
+impl TryFrom<usize> for VarUint32 {
+	type Error = TryFromUsizeForVarUint32;
+	fn try_from(i: usize) -> Result<VarUint32, Self::Error> {
+		let value: u32 = i.try_into().map_err(|_| TryFromUsizeForVarUint32(()))?;
+		Ok(VarUint32(value))
 	}
 }
 
@@ -557,7 +560,9 @@ impl Serialize for String {
 	type Error = Error;
 
 	fn serialize<W: io::Write>(self, writer: &mut W) -> Result<(), Error> {
-		VarUint32::from(self.len()).serialize(writer)?;
+		VarUint32::try_from(self.len())
+			.map_err(|_| Self::Error::InvalidVarInt32)?
+			.serialize(writer)?;
 		writer.write(&self.into_bytes()[..])?;
 		Ok(())
 	}
@@ -610,7 +615,8 @@ impl<'a, W: 'a + io::Write> CountedWriter<'a, W> {
 	pub fn done(self) -> io::Result<()> {
 		let writer = self.writer;
 		let data = self.data;
-		VarUint32::from(data.len())
+		VarUint32::try_from(data.len())
+			.map_err(|_| io::Error::InvalidInput)?
 			.serialize(writer)
 			.map_err(|_| io::Error::InvalidData)?;
 		writer.write(&data[..])?;
@@ -641,7 +647,7 @@ impl<I: Serialize<Error = elements::Error>, T: IntoIterator<Item = I>> Serialize
 	fn serialize<W: io::Write>(self, writer: &mut W) -> Result<(), Self::Error> {
 		let len_us = self.0;
 		let data = self.1;
-		let len: VarUint32 = len_us.into();
+		let len: VarUint32 = len_us.try_into().map_err(|_| Error::InvalidVarUint32)?;
 		len.serialize(writer)?;
 		for data_element in data {
 			data_element.serialize(writer)?
@@ -658,6 +664,7 @@ mod tests {
 		super::{deserialize_buffer, Serialize},
 		CountedList, VarInt32, VarInt64, VarInt7, VarUint32, VarUint64,
 	};
+	use crate::alloc::vec::Vec;
 	use crate::elements::Error;
 
 	fn varuint32_ser_test(val: u32, expected: Vec<u8>) {

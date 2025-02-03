@@ -3,6 +3,7 @@ extern crate casper_wasm;
 use casper_wasm::elements::Section;
 use std::env;
 
+#[cfg(feature = "std")]
 fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 2 {
@@ -50,4 +51,9 @@ fn main() {
 			_ => {},
 		}
 	}
+}
+
+#[cfg(not(feature = "std"))]
+fn main() {
+	panic!("Compilation requires --feature std")
 }

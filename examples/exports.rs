@@ -41,6 +41,7 @@ fn type_by_index(module: &Module, index: usize) -> FunctionType {
 	}
 }
 
+#[cfg(feature = "std")]
 fn main() {
 	// Example executable takes one argument which must
 	// refernce the existing file with a valid wasm module
@@ -82,4 +83,8 @@ fn main() {
 	for export in exports {
 		println!("{:}", export);
 	}
+}
+#[cfg(not(feature = "std"))]
+fn main() {
+	panic!("Compilation requires --feature std")
 }

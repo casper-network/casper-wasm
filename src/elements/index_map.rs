@@ -178,7 +178,9 @@ where
 	type Error = Error;
 
 	fn serialize<W: io::Write>(self, wtr: &mut W) -> Result<(), Self::Error> {
-		VarUint32::from(self.len()).serialize(wtr)?;
+		VarUint32::try_from(self.len())
+			.map_err(|_| Self::Error::InvalidVarInt32)?
+			.serialize(wtr)?;
 		for (idx, value) in self.entries.into_iter() {
 			VarUint32::from(idx).serialize(wtr)?;
 			value.serialize(wtr)?;
@@ -205,6 +207,7 @@ where
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use crate::alloc::string::{String, ToString};
 	use crate::io;
 
 	#[test]

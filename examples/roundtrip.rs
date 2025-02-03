@@ -2,6 +2,7 @@ extern crate casper_wasm;
 
 use std::env;
 
+#[cfg(feature = "std")]
 fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 3 {
@@ -24,4 +25,9 @@ fn main() {
 	};
 
 	casper_wasm::serialize_to_file(&args[2], module).expect("Failed to write module");
+}
+
+#[cfg(not(feature = "std"))]
+fn main() {
+	panic!("Compilation requires --feature std")
 }

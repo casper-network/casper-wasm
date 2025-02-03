@@ -646,7 +646,7 @@ struct PeekSection<'a> {
 	region: &'a [u8],
 }
 
-impl<'a> io::Read for PeekSection<'a> {
+impl io::Read for PeekSection<'_> {
 	fn read(&mut self, buf: &mut [u8]) -> io::Result<()> {
 		let available = cmp::min(buf.len(), self.region.len() - self.cursor);
 		if available < buf.len() {
@@ -705,14 +705,19 @@ pub fn peek_size(source: &[u8]) -> usize {
 
 #[cfg(test)]
 mod integration_tests {
+	#[cfg(feature = "std")]
+	use super::super::deserialize_file;
 	use super::{
 		super::{
-			deserialize_buffer, deserialize_file, serialize, CodeSection, ExportSection,
-			FunctionSection, Section, TypeSection,
+			deserialize_buffer, serialize, CodeSection, ExportSection, FunctionSection, Section,
+			TypeSection,
 		},
 		Module,
 	};
+	use crate::alloc::string::ToString;
+	use crate::alloc::vec::Vec;
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn hello() {
 		let module = deserialize_file("./res/cases/v1/hello.wasm").expect("Should be deserialized");
@@ -721,6 +726,7 @@ mod integration_tests {
 		assert_eq!(module.sections().len(), 8);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn serde() {
 		let module = deserialize_file("./res/cases/v1/test5.wasm").expect("Should be deserialized");
@@ -733,6 +739,7 @@ mod integration_tests {
 		assert_eq!(module_old.sections().len(), module_new.sections().len());
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn serde_type() {
 		let mut module =
@@ -751,6 +758,7 @@ mod integration_tests {
 		);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn serde_import() {
 		let mut module =
@@ -769,6 +777,7 @@ mod integration_tests {
 		);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn serde_code() {
 		let mut module =
@@ -792,6 +801,7 @@ mod integration_tests {
 		);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn const_() {
 		use super::super::Instruction::*;
@@ -820,6 +830,7 @@ mod integration_tests {
 		assert_eq!(I32Const(2147483647), func.code().elements()[17]);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn store() {
 		use super::super::Instruction::*;
@@ -832,6 +843,7 @@ mod integration_tests {
 		assert_eq!(I64Store(0, 32), func.code().elements()[2]);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn peek() {
 		use super::peek_size;
@@ -844,6 +856,7 @@ mod integration_tests {
 		assert_eq!(peek_size(&buf), buf.len() - 4);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn peek_2() {
 		use super::peek_size;
@@ -857,6 +870,7 @@ mod integration_tests {
 		assert_eq!(peek_size(&buf), buf.len() - 9);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn peek_3() {
 		use super::peek_size;
@@ -877,6 +891,7 @@ mod integration_tests {
 		assert_eq!(Module::default().magic, module2.magic);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn names() {
 		let module = deserialize_file("./res/cases/v1/with_names.wasm")
@@ -905,6 +920,7 @@ mod integration_tests {
 		assert!(found_section, "Name section should be present in dedicated example");
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn names_with_global_section() {
 		let module = deserialize_file("./res/cases/v1/global_section.wasm")
@@ -934,12 +950,14 @@ mod integration_tests {
 	}
 
 	// This test fixture has FLAG_SHARED so it depends on atomics feature.
+	#[cfg(feature = "std")]
 	#[test]
 	fn shared_memory_flag() {
 		let module = deserialize_file("./res/cases/v1/varuint1_1.wasm");
 		assert_eq!(module.is_ok(), cfg!(feature = "atomics"));
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn memory_space() {
 		let module =
@@ -947,6 +965,7 @@ mod integration_tests {
 		assert_eq!(module.memory_space(), 2);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn add_custom_section() {
 		let mut module =
@@ -966,6 +985,7 @@ mod integration_tests {
 		assert!(module.custom_sections().next().is_none());
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn mut_start() {
 		let mut module =
@@ -977,6 +997,7 @@ mod integration_tests {
 		assert_eq!(None, module.start_section());
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn add_start() {
 		let mut module =
@@ -989,6 +1010,7 @@ mod integration_tests {
 		assert_eq!(sections, vec![1, 2, 3, 6, 7, 8, 9, 11, 12]);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn add_start_custom() {
 		let mut module = deserialize_file("./res/cases/v1/start_add_custom.wasm")
@@ -1005,6 +1027,7 @@ mod integration_tests {
 		assert_eq!(sections, vec![1, 2, 3, 6, 7, 8, 9, 11, 12, 0]);
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn names_section_present() {
 		let mut module =
@@ -1022,6 +1045,7 @@ mod integration_tests {
 		assert!(module.has_names_section());
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn names_section_not_present() {
 		let mut module =
@@ -1072,6 +1096,7 @@ mod integration_tests {
 		assert!(deserialize_buffer::<Module>(&serialized).is_ok());
 	}
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn serialization_roundtrip() {
 		let module = deserialize_file("./res/cases/v1/test.wasm").expect("failed to deserialize");
