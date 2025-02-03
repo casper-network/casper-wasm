@@ -95,12 +95,12 @@ impl Module {
 		// Custom sections can be inserted anywhere. Lets always insert them last here.
 		if section.order() == 0 {
 			sections.push(section);
-			return Ok(())
+			return Ok(());
 		}
 
 		// Check if the section already exists.
 		if sections.iter().any(|s| s.order() == section.order()) {
-			return Err(Error::DuplicatedSections(section.order()))
+			return Err(Error::DuplicatedSections(section.order()));
 		}
 
 		// Assume that the module is already well-ordered.
@@ -117,7 +117,7 @@ impl Module {
 	pub fn code_section(&self) -> Option<&CodeSection> {
 		for section in self.sections() {
 			if let Section::Code(ref code_section) = *section {
-				return Some(code_section)
+				return Some(code_section);
 			}
 		}
 		None
@@ -127,7 +127,7 @@ impl Module {
 	pub fn code_section_mut(&mut self) -> Option<&mut CodeSection> {
 		for section in self.sections_mut() {
 			if let Section::Code(ref mut code_section) = *section {
-				return Some(code_section)
+				return Some(code_section);
 			}
 		}
 		None
@@ -137,7 +137,7 @@ impl Module {
 	pub fn type_section(&self) -> Option<&TypeSection> {
 		for section in self.sections() {
 			if let Section::Type(ref type_section) = *section {
-				return Some(type_section)
+				return Some(type_section);
 			}
 		}
 		None
@@ -147,7 +147,7 @@ impl Module {
 	pub fn type_section_mut(&mut self) -> Option<&mut TypeSection> {
 		for section in self.sections_mut() {
 			if let Section::Type(ref mut type_section) = *section {
-				return Some(type_section)
+				return Some(type_section);
 			}
 		}
 		None
@@ -157,7 +157,7 @@ impl Module {
 	pub fn import_section(&self) -> Option<&ImportSection> {
 		for section in self.sections() {
 			if let Section::Import(ref import_section) = *section {
-				return Some(import_section)
+				return Some(import_section);
 			}
 		}
 		None
@@ -167,7 +167,7 @@ impl Module {
 	pub fn import_section_mut(&mut self) -> Option<&mut ImportSection> {
 		for section in self.sections_mut() {
 			if let Section::Import(ref mut import_section) = *section {
-				return Some(import_section)
+				return Some(import_section);
 			}
 		}
 		None
@@ -177,7 +177,7 @@ impl Module {
 	pub fn global_section(&self) -> Option<&GlobalSection> {
 		for section in self.sections() {
 			if let Section::Global(ref section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -187,7 +187,7 @@ impl Module {
 	pub fn global_section_mut(&mut self) -> Option<&mut GlobalSection> {
 		for section in self.sections_mut() {
 			if let Section::Global(ref mut section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -197,7 +197,7 @@ impl Module {
 	pub fn export_section(&self) -> Option<&ExportSection> {
 		for section in self.sections() {
 			if let Section::Export(ref export_section) = *section {
-				return Some(export_section)
+				return Some(export_section);
 			}
 		}
 		None
@@ -207,7 +207,7 @@ impl Module {
 	pub fn export_section_mut(&mut self) -> Option<&mut ExportSection> {
 		for section in self.sections_mut() {
 			if let Section::Export(ref mut export_section) = *section {
-				return Some(export_section)
+				return Some(export_section);
 			}
 		}
 		None
@@ -217,7 +217,7 @@ impl Module {
 	pub fn table_section(&self) -> Option<&TableSection> {
 		for section in self.sections() {
 			if let Section::Table(ref section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -227,7 +227,7 @@ impl Module {
 	pub fn table_section_mut(&mut self) -> Option<&mut TableSection> {
 		for section in self.sections_mut() {
 			if let Section::Table(ref mut section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -237,7 +237,7 @@ impl Module {
 	pub fn data_section(&self) -> Option<&DataSection> {
 		for section in self.sections() {
 			if let Section::Data(ref section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -247,7 +247,7 @@ impl Module {
 	pub fn data_section_mut(&mut self) -> Option<&mut DataSection> {
 		for section in self.sections_mut() {
 			if let Section::Data(ref mut section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -257,7 +257,7 @@ impl Module {
 	pub fn elements_section(&self) -> Option<&ElementSection> {
 		for section in self.sections() {
 			if let Section::Element(ref section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -267,7 +267,7 @@ impl Module {
 	pub fn elements_section_mut(&mut self) -> Option<&mut ElementSection> {
 		for section in self.sections_mut() {
 			if let Section::Element(ref mut section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -277,7 +277,7 @@ impl Module {
 	pub fn memory_section(&self) -> Option<&MemorySection> {
 		for section in self.sections() {
 			if let Section::Memory(ref section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -287,7 +287,7 @@ impl Module {
 	pub fn memory_section_mut(&mut self) -> Option<&mut MemorySection> {
 		for section in self.sections_mut() {
 			if let Section::Memory(ref mut section) = *section {
-				return Some(section)
+				return Some(section);
 			}
 		}
 		None
@@ -297,7 +297,7 @@ impl Module {
 	pub fn function_section(&self) -> Option<&FunctionSection> {
 		for section in self.sections() {
 			if let Section::Function(ref sect) = *section {
-				return Some(sect)
+				return Some(sect);
 			}
 		}
 		None
@@ -307,7 +307,7 @@ impl Module {
 	pub fn function_section_mut(&mut self) -> Option<&mut FunctionSection> {
 		for section in self.sections_mut() {
 			if let Section::Function(ref mut sect) = *section {
-				return Some(sect)
+				return Some(sect);
 			}
 		}
 		None
@@ -317,7 +317,7 @@ impl Module {
 	pub fn start_section(&self) -> Option<u32> {
 		for section in self.sections() {
 			if let Section::Start(sect) = *section {
-				return Some(sect)
+				return Some(sect);
 			}
 		}
 		None
@@ -328,7 +328,7 @@ impl Module {
 		for section in self.sections_mut().iter_mut() {
 			if let Section::Start(_sect) = *section {
 				*section = Section::Start(new_start);
-				return
+				return;
 			}
 		}
 		// This should not fail, because we update the existing section above.
@@ -343,7 +343,7 @@ impl Module {
 		for (index, section) in sections.iter_mut().enumerate() {
 			if let Section::Start(_sect) = section {
 				rmidx = index;
-				break
+				break;
 			}
 		}
 		if rmidx < sections.len() {
@@ -366,7 +366,7 @@ impl Module {
 			if let Section::Custom(ref mut sect) = *section {
 				if sect.name() == name {
 					*sect = CustomSection::new(name, payload);
-					return
+					return;
 				}
 			}
 		}
@@ -422,7 +422,7 @@ impl Module {
 	pub fn names_section(&self) -> Option<&NameSection> {
 		for section in self.sections() {
 			if let Section::Name(ref sect) = *section {
-				return Some(sect)
+				return Some(sect);
 			}
 		}
 		None
@@ -435,7 +435,7 @@ impl Module {
 	pub fn names_section_mut(&mut self) -> Option<&mut NameSection> {
 		for section in self.sections_mut() {
 			if let Section::Name(ref mut sect) = *section {
-				return Some(sect)
+				return Some(sect);
 			}
 		}
 		None
@@ -460,7 +460,7 @@ impl Module {
 							Ok(ns) => ns,
 							Err(e) => {
 								parse_errors.push((i, e));
-								continue
+								continue;
 							},
 						};
 						Some(name_section)
@@ -502,12 +502,12 @@ impl Module {
 								Ok(reloc_section) => reloc_section,
 								Err(e) => {
 									parse_errors.push((i, e));
-									continue
+									continue;
 								},
 							};
 						if rdr.position() != custom.payload().len() {
 							parse_errors.push((i, io::Error::InvalidData.into()));
-							continue
+							continue;
 						}
 						Some(Section::Reloc(reloc_section))
 					} else {
@@ -537,10 +537,10 @@ impl Module {
 					.filter(|import| {
 						matches!(
 							(count_type, *import.external()),
-							(ImportCountType::Function, External::Function(_)) |
-								(ImportCountType::Global, External::Global(_)) |
-								(ImportCountType::Table, External::Table(_)) |
-								(ImportCountType::Memory, External::Memory(_))
+							(ImportCountType::Function, External::Function(_))
+								| (ImportCountType::Global, External::Global(_))
+								| (ImportCountType::Table, External::Table(_))
+								| (ImportCountType::Memory, External::Memory(_))
 						)
 					})
 					.count()
@@ -550,26 +550,26 @@ impl Module {
 
 	/// Query functions space.
 	pub fn functions_space(&self) -> usize {
-		self.import_count(ImportCountType::Function) +
-			self.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Function)
+			+ self.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
 	}
 
 	/// Query globals space.
 	pub fn globals_space(&self) -> usize {
-		self.import_count(ImportCountType::Global) +
-			self.global_section().map(|gs| gs.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Global)
+			+ self.global_section().map(|gs| gs.entries().len()).unwrap_or(0)
 	}
 
 	/// Query table space.
 	pub fn table_space(&self) -> usize {
-		self.import_count(ImportCountType::Table) +
-			self.table_section().map(|ts| ts.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Table)
+			+ self.table_section().map(|ts| ts.entries().len()).unwrap_or(0)
 	}
 
 	/// Query memory space.
 	pub fn memory_space(&self) -> usize {
-		self.import_count(ImportCountType::Memory) +
-			self.memory_section().map(|ms| ms.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Memory)
+			+ self.memory_section().map(|ms| ms.entries().len()).unwrap_or(0)
 	}
 }
 
@@ -582,13 +582,13 @@ impl Deserialize for Module {
 		let mut magic = [0u8; 4];
 		reader.read(&mut magic)?;
 		if magic != WASM_MAGIC_NUMBER {
-			return Err(Error::InvalidMagic)
+			return Err(Error::InvalidMagic);
 		}
 
 		let version: u32 = Uint32::deserialize(reader)?.into();
 
 		if version != 1 {
-			return Err(Error::UnsupportedVersion(version))
+			return Err(Error::UnsupportedVersion(version));
 		}
 
 		let mut last_section_order = 0;
@@ -601,8 +601,9 @@ impl Deserialize for Module {
 					if section.order() != 0 {
 						match last_section_order {
 							x if x > section.order() => return Err(Error::SectionsOutOfOrder),
-							x if x == section.order() =>
-								return Err(Error::DuplicatedSections(last_section_order)),
+							x if x == section.order() => {
+								return Err(Error::DuplicatedSections(last_section_order))
+							},
 							_ => {},
 						};
 
@@ -615,10 +616,10 @@ impl Deserialize for Module {
 
 		let module = Module { magic: u32::from_le_bytes(magic), version, sections };
 
-		if module.code_section().map(|cs| cs.bodies().len()).unwrap_or(0) !=
-			module.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
+		if module.code_section().map(|cs| cs.bodies().len()).unwrap_or(0)
+			!= module.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
 		{
-			return Err(Error::InconsistentCode)
+			return Err(Error::InconsistentCode);
 		}
 
 		Ok(module)
@@ -649,7 +650,7 @@ impl<'a> io::Read for PeekSection<'a> {
 	fn read(&mut self, buf: &mut [u8]) -> io::Result<()> {
 		let available = cmp::min(buf.len(), self.region.len() - self.cursor);
 		if available < buf.len() {
-			return Err(io::Error::UnexpectedEof)
+			return Err(io::Error::UnexpectedEof);
 		}
 
 		let range = self.cursor..self.cursor + buf.len();
@@ -663,7 +664,7 @@ impl<'a> io::Read for PeekSection<'a> {
 /// Returns size of the module in the provided stream.
 pub fn peek_size(source: &[u8]) -> usize {
 	if source.len() < 9 {
-		return 0
+		return 0;
 	}
 
 	let mut cursor = 8;
@@ -689,13 +690,13 @@ pub fn peek_size(source: &[u8]) -> usize {
 				x if x > source.len() => break,
 				x if x == source.len() => {
 					cursor = next_cursor;
-					break
+					break;
 				},
 				_ => {},
 			}
 			cursor = next_cursor;
 		} else {
-			break
+			break;
 		}
 	}
 
@@ -774,7 +775,7 @@ mod integration_tests {
 			deserialize_file("./res/cases/v1/test5.wasm").expect("Should be deserialized");
 		module.sections_mut().retain(|x| {
 			if let Section::Code(_) = *x {
-				return true
+				return true;
 			}
 			matches!(*x, Section::Function(_))
 		});

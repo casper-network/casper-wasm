@@ -50,7 +50,7 @@ impl Deserialize for Instructions {
 
 			instructions.push(instruction);
 			if block_count == 0 {
-				break
+				break;
 			}
 		}
 
@@ -97,7 +97,7 @@ impl Deserialize for InitExpr {
 			let is_terminal = instruction.is_terminal();
 			instructions.push(instruction);
 			if is_terminal {
-				break
+				break;
 			}
 		}
 
@@ -1089,7 +1089,7 @@ impl Deserialize for Instruction {
 				let signature: u32 = VarUint32::deserialize(reader)?.into();
 				let table_ref: u8 = Uint8::deserialize(reader)?.into();
 				if table_ref != 0 {
-					return Err(Error::InvalidTableReference(table_ref))
+					return Err(Error::InvalidTableReference(table_ref));
 				}
 
 				CallIndirect(signature, table_ref)
@@ -1221,14 +1221,14 @@ impl Deserialize for Instruction {
 			CURRENTMEMORY => {
 				let mem_ref: u8 = Uint8::deserialize(reader)?.into();
 				if mem_ref != 0 {
-					return Err(Error::InvalidMemoryReference(mem_ref))
+					return Err(Error::InvalidMemoryReference(mem_ref));
 				}
 				CurrentMemory(mem_ref)
 			},
 			GROWMEMORY => {
 				let mem_ref: u8 = Uint8::deserialize(reader)?.into();
 				if mem_ref != 0 {
-					return Err(Error::InvalidMemoryReference(mem_ref))
+					return Err(Error::InvalidMemoryReference(mem_ref));
 				}
 				GrowMemory(mem_ref)
 			},
@@ -1657,34 +1657,34 @@ fn deserialize_bulk<R: io::Read>(reader: &mut R) -> Result<Instruction, Error> {
 	Ok(Instruction::Bulk(match val {
 		MEMORY_INIT => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			MemoryInit(VarUint32::deserialize(reader)?.into())
 		},
 		MEMORY_DROP => MemoryDrop(VarUint32::deserialize(reader)?.into()),
 		MEMORY_FILL => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			MemoryFill
 		},
 		MEMORY_COPY => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			MemoryCopy
 		},
 
 		TABLE_INIT => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			TableInit(VarUint32::deserialize(reader)?.into())
 		},
 		TABLE_DROP => TableDrop(VarUint32::deserialize(reader)?.into()),
 		TABLE_COPY => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			TableCopy
 		},
@@ -2947,7 +2947,8 @@ fn ifelse() {
 		.skip(1)
 		.skip_while(|op| !matches!(**op, Instruction::Else))
 		.take_while(|op| !matches!(**op, Instruction::End))
-		.count() - 1; // minus Instruction::Else itself
+		.count()
+		- 1; // minus Instruction::Else itself
 	assert_eq!(before_else, after_else);
 }
 

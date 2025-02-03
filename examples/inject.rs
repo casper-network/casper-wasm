@@ -16,7 +16,7 @@ pub fn inject_nop(instructions: &mut elements::Instructions) {
 
 		position += 1;
 		if position >= instructions.len() {
-			break
+			break;
 		}
 	}
 }
@@ -25,7 +25,7 @@ fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 3 {
 		println!("Usage: {} input_file.wasm output_file.wasm", args[0]);
-		return
+		return;
 	}
 
 	let mut module = casper_wasm::deserialize_file(&args[1]).unwrap();

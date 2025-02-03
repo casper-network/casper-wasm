@@ -7,7 +7,7 @@ fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 2 {
 		println!("Usage: {} somefile.wasm", args[0]);
-		return
+		return;
 	}
 
 	let module = casper_wasm::deserialize_file(&args[1]).expect("Failed to load module");

@@ -48,7 +48,7 @@ fn main() {
 	if args.len() < 2 {
 		println!("Prints export function names with and their types");
 		println!("Usage: {} <wasm file>", args[0]);
-		return
+		return;
 	}
 
 	// Here we load module using dedicated for this purpose

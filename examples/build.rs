@@ -14,7 +14,7 @@ fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 2 {
 		println!("Usage: {} output_file.wasm", args[0]);
-		return
+		return;
 	}
 
 	// Main entry for the builder api is the module function

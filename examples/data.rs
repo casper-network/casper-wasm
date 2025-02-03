@@ -11,7 +11,7 @@ fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 2 {
 		println!("Usage: {} somefile.wasm", args[0]);
-		return
+		return;
 	}
 
 	// Here we load module using dedicated for this purpose

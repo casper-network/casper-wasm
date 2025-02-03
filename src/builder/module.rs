@@ -277,7 +277,7 @@ where
 						let elements::Type::Function(ref existing) = t;
 						*existing == func_type
 					}) {
-					return existing_entry.0 as u32
+					return existing_entry.0 as u32;
 				}
 				self.module.types.types_mut().push(elements::Type::Function(func_type));
 				self.module.types.types().len() as u32 - 1

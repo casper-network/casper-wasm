@@ -78,21 +78,21 @@ impl NameSection {
 			match subsection_type {
 				NAME_TYPE_MODULE => {
 					if module_name.is_some() {
-						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION))
+						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION));
 					}
 					module_name = Some(ModuleNameSubsection::deserialize(rdr)?);
 				},
 
 				NAME_TYPE_FUNCTION => {
 					if function_names.is_some() {
-						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION))
+						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION));
 					}
 					function_names = Some(FunctionNameSubsection::deserialize(module, rdr)?);
 				},
 
 				NAME_TYPE_LOCAL => {
 					if local_names.is_some() {
-						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_LOCAL))
+						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_LOCAL));
 					}
 					local_names = Some(LocalNameSubsection::deserialize(module, rdr)?);
 				},

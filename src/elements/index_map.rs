@@ -107,13 +107,13 @@ impl<T> IndexMap<T> {
 		for _ in 0..len {
 			let idx: u32 = VarUint32::deserialize(rdr)?.into();
 			if idx as usize >= max_entry_space {
-				return Err(Error::Other("index is larger than expected"))
+				return Err(Error::Other("index is larger than expected"));
 			}
 			match prev_idx {
 				Some(prev) if prev >= idx => {
 					// Supposedly these names must be "sorted by index", so
 					// let's try enforcing that and seeing what happens.
-					return Err(Error::Other("indices are out of order"))
+					return Err(Error::Other("indices are out of order"));
 				},
 				_ => {
 					prev_idx = Some(idx);

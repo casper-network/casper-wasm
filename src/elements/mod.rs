@@ -204,14 +204,17 @@ impl fmt::Display for Error {
 			Error::InvalidSectionId(ref id) => write!(f, "Invalid section id: {}", id),
 			Error::SectionsOutOfOrder => write!(f, "Sections out of order"),
 			Error::DuplicatedSections(ref id) => write!(f, "Duplicated sections ({})", id),
-			Error::InvalidMemoryReference(ref mem_ref) =>
-				write!(f, "Invalid memory reference ({})", mem_ref),
-			Error::InvalidTableReference(ref table_ref) =>
-				write!(f, "Invalid table reference ({})", table_ref),
+			Error::InvalidMemoryReference(ref mem_ref) => {
+				write!(f, "Invalid memory reference ({})", mem_ref)
+			},
+			Error::InvalidTableReference(ref table_ref) => {
+				write!(f, "Invalid table reference ({})", table_ref)
+			},
 			Error::InvalidLimitsFlags(ref flags) => write!(f, "Invalid limits flags ({})", flags),
 			Error::UnknownFunctionForm(ref form) => write!(f, "Unknown function form ({})", form),
-			Error::InconsistentCode =>
-				write!(f, "Number of function body entries and signatures does not match"),
+			Error::InconsistentCode => {
+				write!(f, "Number of function body entries and signatures does not match")
+			},
 			Error::InvalidSegmentFlags(n) => write!(f, "Invalid segment flags: {}", n),
 			Error::TooManyLocals => write!(f, "Too many locals"),
 			Error::DuplicatedNameSubsections(n) => write!(f, "Duplicated name subsections: {}", n),
@@ -253,8 +256,9 @@ impl ::std::error::Error for Error {
 			Error::InvalidTableReference(_) => "Invalid table reference",
 			Error::InvalidLimitsFlags(_) => "Invalid limits flags",
 			Error::UnknownFunctionForm(_) => "Unknown function form",
-			Error::InconsistentCode =>
-				"Number of function body entries and signatures does not match",
+			Error::InconsistentCode => {
+				"Number of function body entries and signatures does not match"
+			},
 			Error::InvalidSegmentFlags(_) => "Invalid segment flags",
 			Error::TooManyLocals => "Too many locals",
 			Error::DuplicatedNameSubsections(_) => "Duplicated name subsections",
@@ -307,7 +311,7 @@ pub fn deserialize_buffer<T: Deserialize>(contents: &[u8]) -> Result<T, T::Error
 	if reader.position() != contents.len() {
 		// It's a TrailingData, since if there is not enough data then
 		// UnexpectedEof must have been returned earlier in T::deserialize.
-		return Err(io::Error::TrailingData.into())
+		return Err(io::Error::TrailingData.into());
 	}
 	Ok(result)
 }

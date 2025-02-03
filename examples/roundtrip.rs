@@ -6,7 +6,7 @@ fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 3 {
 		println!("Usage: {} in.wasm out.wasm", args[0]);
-		return
+		return;
 	}
 
 	let module = match casper_wasm::deserialize_file(&args[1])

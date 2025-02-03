@@ -201,7 +201,7 @@ impl Deserialize for FunctionType {
 		let form: u8 = VarUint7::deserialize(reader)?.into();
 
 		if form != 0x60 {
-			return Err(Error::UnknownFunctionForm(form))
+			return Err(Error::UnknownFunctionForm(form));
 		}
 
 		let params: Vec<ValueType> = CountedList::deserialize(reader)?.into_inner();
@@ -211,7 +211,7 @@ impl Deserialize for FunctionType {
 		if results.len() > 1 {
 			return Err(Error::Other(
 				"Enable the multi_value feature to deserialize more than one function result",
-			))
+			));
 		}
 
 		Ok(FunctionType { form, params, results })
