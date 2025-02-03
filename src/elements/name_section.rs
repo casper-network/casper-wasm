@@ -294,6 +294,10 @@ pub type NameMap = IndexMap<String>;
 
 #[cfg(test)]
 mod tests {
+	use std::io::Cursor;
+
+	use crate::elements;
+
 	use super::*;
 
 	// A helper function for the tests. Serialize a section, deserialize it,
@@ -354,19 +358,23 @@ mod tests {
 	}
 
 	#[test]
-	fn deserialize_local_names() {
-		let module = super::super::deserialize_file("./res/cases/v1/names_with_imports.wasm")
-			.expect("Should be deserialized")
-			.parse_names()
-			.expect("Names to be parsed");
+	fn deserialize_invalid_name_section() {
+		let invalid = {
+			let mut invalid = Vec::new();
+			VarUint7::from(u8::MAX).serialize(&mut invalid).unwrap();
+			VarUint32::from(u32::MAX).serialize(&mut invalid).unwrap();
+			invalid.extend_from_slice(&[0; 1024]);
+			invalid
+		};
 
-		let name_section = module.names_section().expect("name_section should be present");
-		let local_names = name_section.locals().expect("local_name_section should be present");
+		let module = Module::new(Vec::new());
 
-		let locals = local_names.local_names().get(0).expect("entry #0 should be present");
-		assert_eq!(locals.get(0).expect("entry #0 should be present"), "abc");
+		let mut cur = Cursor::new(invalid.as_slice());
 
-		let locals = local_names.local_names().get(1).expect("entry #1 should be present");
-		assert_eq!(locals.get(0).expect("entry #0 should be present"), "def");
+		let result = NameSection::deserialize(&module, &mut cur);
+		assert!(
+			matches!(&result, Err(elements::Error::HeapOther(msg)) if msg == "I/O Error: Io(Error { kind: UnexpectedEof, message: \"failed to fill whole buffer\" })"),
+			"{result:?}"
+		);
 	}
 }
