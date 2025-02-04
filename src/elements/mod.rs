@@ -256,9 +256,8 @@ impl ::std::error::Error for Error {
 			Error::InvalidTableReference(_) => "Invalid table reference",
 			Error::InvalidLimitsFlags(_) => "Invalid limits flags",
 			Error::UnknownFunctionForm(_) => "Unknown function form",
-			Error::InconsistentCode => {
-				"Number of function body entries and signatures does not match"
-			},
+			Error::InconsistentCode =>
+				"Number of function body entries and signatures does not match",
 			Error::InvalidSegmentFlags(_) => "Invalid segment flags",
 			Error::TooManyLocals => "Too many locals",
 			Error::DuplicatedNameSubsections(_) => "Duplicated name subsections",

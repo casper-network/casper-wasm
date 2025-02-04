@@ -207,8 +207,10 @@ where
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::alloc::string::{String, ToString};
-	use crate::io;
+	use crate::{
+		alloc::string::{String, ToString},
+		io,
+	};
 
 	#[test]
 	fn default_is_empty_no_matter_how_we_look_at_it() {

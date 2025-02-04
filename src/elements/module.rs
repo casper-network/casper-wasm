@@ -537,10 +537,10 @@ impl Module {
 					.filter(|import| {
 						matches!(
 							(count_type, *import.external()),
-							(ImportCountType::Function, External::Function(_))
-								| (ImportCountType::Global, External::Global(_))
-								| (ImportCountType::Table, External::Table(_))
-								| (ImportCountType::Memory, External::Memory(_))
+							(ImportCountType::Function, External::Function(_)) |
+								(ImportCountType::Global, External::Global(_)) |
+								(ImportCountType::Table, External::Table(_)) |
+								(ImportCountType::Memory, External::Memory(_))
 						)
 					})
 					.count()
@@ -550,26 +550,26 @@ impl Module {
 
 	/// Query functions space.
 	pub fn functions_space(&self) -> usize {
-		self.import_count(ImportCountType::Function)
-			+ self.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Function) +
+			self.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
 	}
 
 	/// Query globals space.
 	pub fn globals_space(&self) -> usize {
-		self.import_count(ImportCountType::Global)
-			+ self.global_section().map(|gs| gs.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Global) +
+			self.global_section().map(|gs| gs.entries().len()).unwrap_or(0)
 	}
 
 	/// Query table space.
 	pub fn table_space(&self) -> usize {
-		self.import_count(ImportCountType::Table)
-			+ self.table_section().map(|ts| ts.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Table) +
+			self.table_section().map(|ts| ts.entries().len()).unwrap_or(0)
 	}
 
 	/// Query memory space.
 	pub fn memory_space(&self) -> usize {
-		self.import_count(ImportCountType::Memory)
-			+ self.memory_section().map(|ms| ms.entries().len()).unwrap_or(0)
+		self.import_count(ImportCountType::Memory) +
+			self.memory_section().map(|ms| ms.entries().len()).unwrap_or(0)
 	}
 }
 
@@ -601,9 +601,8 @@ impl Deserialize for Module {
 					if section.order() != 0 {
 						match last_section_order {
 							x if x > section.order() => return Err(Error::SectionsOutOfOrder),
-							x if x == section.order() => {
-								return Err(Error::DuplicatedSections(last_section_order))
-							},
+							x if x == section.order() =>
+								return Err(Error::DuplicatedSections(last_section_order)),
 							_ => {},
 						};
 
@@ -616,8 +615,8 @@ impl Deserialize for Module {
 
 		let module = Module { magic: u32::from_le_bytes(magic), version, sections };
 
-		if module.code_section().map(|cs| cs.bodies().len()).unwrap_or(0)
-			!= module.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
+		if module.code_section().map(|cs| cs.bodies().len()).unwrap_or(0) !=
+			module.function_section().map(|fs| fs.entries().len()).unwrap_or(0)
 		{
 			return Err(Error::InconsistentCode);
 		}
@@ -714,8 +713,7 @@ mod integration_tests {
 		},
 		Module,
 	};
-	use crate::alloc::string::ToString;
-	use crate::alloc::vec::Vec;
+	use crate::alloc::{string::ToString, vec::Vec};
 
 	#[cfg(feature = "std")]
 	#[test]

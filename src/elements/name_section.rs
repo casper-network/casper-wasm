@@ -301,8 +301,10 @@ pub type NameMap = IndexMap<String>;
 
 #[cfg(test)]
 mod tests {
-	use crate::alloc::{string::ToString, vec::Vec};
-	use crate::elements;
+	use crate::{
+		alloc::{string::ToString, vec::Vec},
+		elements,
+	};
 
 	use super::*;
 

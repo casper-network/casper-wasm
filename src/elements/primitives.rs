@@ -340,8 +340,8 @@ impl Serialize for VarInt32 {
 		while more {
 			buf[0] = (v & 0b0111_1111) as u8;
 			v >>= 7;
-			if (v == 0 && buf[0] & 0b0100_0000 == 0)
-				|| (v == -1 && buf[0] & 0b0100_0000 == 0b0100_0000)
+			if (v == 0 && buf[0] & 0b0100_0000 == 0) ||
+				(v == -1 && buf[0] & 0b0100_0000 == 0b0100_0000)
 			{
 				more = false
 			} else {
@@ -416,8 +416,8 @@ impl Serialize for VarInt64 {
 		while more {
 			buf[0] = (v & 0b0111_1111) as u8;
 			v >>= 7;
-			if (v == 0 && buf[0] & 0b0100_0000 == 0)
-				|| (v == -1 && buf[0] & 0b0100_0000 == 0b0100_0000)
+			if (v == 0 && buf[0] & 0b0100_0000 == 0) ||
+				(v == -1 && buf[0] & 0b0100_0000 == 0b0100_0000)
 			{
 				more = false
 			} else {
@@ -664,8 +664,7 @@ mod tests {
 		super::{deserialize_buffer, Serialize},
 		CountedList, VarInt32, VarInt64, VarInt7, VarUint32, VarUint64,
 	};
-	use crate::alloc::vec::Vec;
-	use crate::elements::Error;
+	use crate::{alloc::vec::Vec, elements::Error};
 
 	fn varuint32_ser_test(val: u32, expected: Vec<u8>) {
 		let mut buf = Vec::new();
