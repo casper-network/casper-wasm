@@ -101,9 +101,9 @@ impl NameSection {
 				},
 
 				_ => {
-					let size: i64 = size.try_into().map_err(|_| Error::UnexpectedEof)?;
-					rdr.seek_relative(size)?;
-					// Behavior of seeking past the length is implementation defined
+					let offset: i64 = size.try_into().map_err(|_| Error::UnexpectedEof)?;
+					rdr.seek_relative(offset)?;
+					// Behavior of seeking past the length is implementation defined, so we need a way to force an EOF error.
 					if rdr.stream_position()? > rdr.stream_len()? {
 						return Err(Error::UnexpectedEof);
 					}
