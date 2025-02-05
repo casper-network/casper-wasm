@@ -115,7 +115,8 @@ impl<T: io::Read> Read for T {
 #[cfg(feature = "std")]
 impl<T: io::Seek> Seek for T {
 	fn seek_relative(&mut self, pos: i64) -> Result<()> {
-		self.seek_relative(pos).map_err(Error::Io)
+		self.seek(std::io::SeekFrom::Current(pos)).map_err(Error::Io)?;
+		Ok(())
 	}
 
 	fn stream_position(&mut self) -> Result<u64> {
