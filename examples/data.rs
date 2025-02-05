@@ -8,7 +8,7 @@ use std::env;
 #[cfg(feature = "std")]
 fn main() {
 	// Example executable takes one argument which must
-	// refernce the existing file with a valid wasm module
+	// reference the existing file with a valid wasm module
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 2 {
 		println!("Usage: {} somefile.wasm", args[0]);
