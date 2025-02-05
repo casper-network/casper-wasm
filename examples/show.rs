@@ -2,11 +2,12 @@ extern crate casper_wasm;
 
 use std::env;
 
+#[cfg(feature = "std")]
 fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 3 {
 		println!("Usage: {} <wasm file> <index of function>", args[0]);
-		return
+		return;
 	}
 
 	let module = casper_wasm::deserialize_file(&args[1]).expect("Failed to load module");
@@ -35,4 +36,9 @@ fn main() {
 	for instruction in code.code().elements() {
 		println!("{}", instruction);
 	}
+}
+
+#[cfg(not(feature = "std"))]
+fn main() {
+	panic!("Compilation requires --features std")
 }

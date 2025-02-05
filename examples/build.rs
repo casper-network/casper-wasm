@@ -8,13 +8,14 @@ use std::env;
 
 use casper_wasm::{builder, elements};
 
+#[cfg(feature = "std")]
 fn main() {
 	// Example binary accepts one parameter which is the output file
 	// where generated wasm module will be written at the end of execution
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 2 {
 		println!("Usage: {} output_file.wasm", args[0]);
-		return
+		return;
 	}
 
 	// Main entry for the builder api is the module function
@@ -45,4 +46,9 @@ fn main() {
 
 	// Module structure can be serialzed to produce a valid wasm file
 	casper_wasm::serialize_to_file(&args[1], module).unwrap();
+}
+
+#[cfg(not(feature = "std"))]
+fn main() {
+	panic!("Compilation requires --feature std")
 }

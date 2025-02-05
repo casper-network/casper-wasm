@@ -289,7 +289,7 @@ impl Deserialize for CustomSection {
 		let buf = buffered_read!(ENTRIES_BUFFER_LENGTH, section_length, reader);
 		let mut cursor = io::Cursor::new(&buf[..]);
 		let name = String::deserialize(&mut cursor)?;
-		let payload = buf[cursor.position() as usize..].to_vec();
+		let payload = buf[cursor.position()..].to_vec();
 		Ok(CustomSection { name, payload })
 	}
 }
@@ -759,14 +759,17 @@ impl Serialize for DataSection {
 #[cfg(test)]
 mod tests {
 
+	#[cfg(feature = "std")]
+	use super::super::deserialize_file;
 	use super::{
 		super::{
-			deserialize_buffer, deserialize_file, serialize, BlockType, DataSegment,
-			ElementSegment, FuncBody, InitExpr, Instructions, Local, ValueType,
+			deserialize_buffer, serialize, BlockType, DataSegment, ElementSegment, FuncBody,
+			InitExpr, Instructions, Local, ValueType,
 		},
 		CodeSection, DataSection, ElementSection, Section, Type, TypeSection,
 	};
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn import_section() {
 		let module = deserialize_file("./res/cases/v1/test5.wasm").expect("Should be deserialized");

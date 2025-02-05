@@ -65,7 +65,10 @@ impl NameSection {
 
 impl NameSection {
 	/// Deserialize a name section.
-	pub fn deserialize<R: io::Read>(module: &Module, rdr: &mut R) -> Result<Self, Error> {
+	pub fn deserialize<R: io::Read + io::Seek>(
+		module: &Module,
+		rdr: &mut R,
+	) -> Result<Self, Error> {
 		let mut module_name: Option<ModuleNameSubsection> = None;
 		let mut function_names: Option<FunctionNameSubsection> = None;
 		let mut local_names: Option<LocalNameSubsection> = None;
@@ -78,30 +81,32 @@ impl NameSection {
 			match subsection_type {
 				NAME_TYPE_MODULE => {
 					if module_name.is_some() {
-						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION))
+						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION));
 					}
 					module_name = Some(ModuleNameSubsection::deserialize(rdr)?);
 				},
 
 				NAME_TYPE_FUNCTION => {
 					if function_names.is_some() {
-						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION))
+						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_FUNCTION));
 					}
 					function_names = Some(FunctionNameSubsection::deserialize(module, rdr)?);
 				},
 
 				NAME_TYPE_LOCAL => {
 					if local_names.is_some() {
-						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_LOCAL))
+						return Err(Error::DuplicatedNameSubsections(NAME_TYPE_LOCAL));
 					}
 					local_names = Some(LocalNameSubsection::deserialize(module, rdr)?);
 				},
 
 				_ => {
-					// Consume the entire subsection size and drop it. This allows other sections to still be
-					// consumed if there are any.
-					let mut buf = vec![0; size];
-					rdr.read(&mut buf)?;
+					let offset: i64 = size.try_into().map_err(|_| Error::UnexpectedEof)?;
+					rdr.seek_relative(offset)?;
+					// Behavior of seeking past the length is implementation defined, so we need a way to force an EOF error.
+					if rdr.stream_position()? > rdr.stream_len()? {
+						return Err(Error::UnexpectedEof);
+					}
 				},
 			};
 		}
@@ -120,7 +125,9 @@ impl Serialize for NameSection {
 			name_payload: &[u8],
 		) -> Result<(), Error> {
 			VarUint7::from(name_type).serialize(wtr)?;
-			VarUint32::from(name_payload.len()).serialize(wtr)?;
+			VarUint32::try_from(name_payload.len())
+				.map_err(|_| Error::InvalidVarInt32)?
+				.serialize(wtr)?;
 			wtr.write(name_payload).map_err(Into::into)
 		}
 
@@ -294,6 +301,11 @@ pub type NameMap = IndexMap<String>;
 
 #[cfg(test)]
 mod tests {
+	use crate::{
+		alloc::{string::ToString, vec::Vec},
+		elements,
+	};
+
 	use super::*;
 
 	// A helper function for the tests. Serialize a section, deserialize it,
@@ -354,19 +366,21 @@ mod tests {
 	}
 
 	#[test]
-	fn deserialize_local_names() {
-		let module = super::super::deserialize_file("./res/cases/v1/names_with_imports.wasm")
-			.expect("Should be deserialized")
-			.parse_names()
-			.expect("Names to be parsed");
+	fn deserialize_invalid_name_section() {
+		let invalid = {
+			let mut invalid = Vec::new();
+			VarUint7::from(u8::MAX).serialize(&mut invalid).unwrap();
+			VarUint32::from(u32::MAX).serialize(&mut invalid).unwrap();
+			invalid.extend_from_slice(&[0; 1024]);
+			invalid
+		};
 
-		let name_section = module.names_section().expect("name_section should be present");
-		let local_names = name_section.locals().expect("local_name_section should be present");
+		let module = Module::new(Vec::new());
 
-		let locals = local_names.local_names().get(0).expect("entry #0 should be present");
-		assert_eq!(locals.get(0).expect("entry #0 should be present"), "abc");
+		let mut cur = crate::io::Cursor::new(invalid.as_slice());
 
-		let locals = local_names.local_names().get(1).expect("entry #1 should be present");
-		assert_eq!(locals.get(0).expect("entry #0 should be present"), "def");
+		let result = NameSection::deserialize(&module, &mut cur);
+
+		assert!(matches!(&result, Err(elements::Error::UnexpectedEof)), "{result:?}");
 	}
 }

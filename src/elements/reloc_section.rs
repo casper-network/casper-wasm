@@ -311,11 +311,11 @@ impl Serialize for RelocationEntry {
 
 #[cfg(test)]
 mod tests {
-	use super::{
-		super::{deserialize_file, Section},
-		RelocationEntry,
-	};
+	#[cfg(feature = "std")]
+	use super::super::deserialize_file;
+	use super::{super::Section, RelocationEntry};
 
+	#[cfg(feature = "std")]
 	#[test]
 	fn reloc_section() {
 		let module = deserialize_file("./res/cases/v1/relocatable.wasm")

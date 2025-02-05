@@ -16,16 +16,17 @@ pub fn inject_nop(instructions: &mut elements::Instructions) {
 
 		position += 1;
 		if position >= instructions.len() {
-			break
+			break;
 		}
 	}
 }
 
+#[cfg(feature = "std")]
 fn main() {
 	let args = env::args().collect::<Vec<_>>();
 	if args.len() != 3 {
 		println!("Usage: {} input_file.wasm output_file.wasm", args[0]);
-		return
+		return;
 	}
 
 	let mut module = casper_wasm::deserialize_file(&args[1]).unwrap();
@@ -45,4 +46,9 @@ fn main() {
 	let build = build.import().module("env").field("log").external().func(import_sig).build();
 
 	casper_wasm::serialize_to_file(&args[2], build.build()).unwrap();
+}
+
+#[cfg(not(feature = "std"))]
+fn main() {
+	panic!("Compilation requires --feature std")
 }

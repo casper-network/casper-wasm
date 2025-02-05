@@ -2,9 +2,9 @@ name: Check
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -95,3 +95,10 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           command: test
           args: --all-features --workspace
+
+      - name: Cargo test with no-std
+        uses: actions-rs/cargo@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          command: test
+          args: --no-default-features --workspace

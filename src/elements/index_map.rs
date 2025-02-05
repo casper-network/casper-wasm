@@ -107,13 +107,13 @@ impl<T> IndexMap<T> {
 		for _ in 0..len {
 			let idx: u32 = VarUint32::deserialize(rdr)?.into();
 			if idx as usize >= max_entry_space {
-				return Err(Error::Other("index is larger than expected"))
+				return Err(Error::Other("index is larger than expected"));
 			}
 			match prev_idx {
 				Some(prev) if prev >= idx => {
 					// Supposedly these names must be "sorted by index", so
 					// let's try enforcing that and seeing what happens.
-					return Err(Error::Other("indices are out of order"))
+					return Err(Error::Other("indices are out of order"));
 				},
 				_ => {
 					prev_idx = Some(idx);
@@ -178,7 +178,9 @@ where
 	type Error = Error;
 
 	fn serialize<W: io::Write>(self, wtr: &mut W) -> Result<(), Self::Error> {
-		VarUint32::from(self.len()).serialize(wtr)?;
+		VarUint32::try_from(self.len())
+			.map_err(|_| Self::Error::InvalidVarInt32)?
+			.serialize(wtr)?;
 		for (idx, value) in self.entries.into_iter() {
 			VarUint32::from(idx).serialize(wtr)?;
 			value.serialize(wtr)?;
@@ -205,7 +207,10 @@ where
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use crate::io;
+	use crate::{
+		alloc::string::{String, ToString},
+		io,
+	};
 
 	#[test]
 	fn default_is_empty_no_matter_how_we_look_at_it() {

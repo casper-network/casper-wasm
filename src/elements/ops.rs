@@ -50,7 +50,7 @@ impl Deserialize for Instructions {
 
 			instructions.push(instruction);
 			if block_count == 0 {
-				break
+				break;
 			}
 		}
 
@@ -97,7 +97,7 @@ impl Deserialize for InitExpr {
 			let is_terminal = instruction.is_terminal();
 			instructions.push(instruction);
 			if is_terminal {
-				break
+				break;
 			}
 		}
 
@@ -1089,7 +1089,7 @@ impl Deserialize for Instruction {
 				let signature: u32 = VarUint32::deserialize(reader)?.into();
 				let table_ref: u8 = Uint8::deserialize(reader)?.into();
 				if table_ref != 0 {
-					return Err(Error::InvalidTableReference(table_ref))
+					return Err(Error::InvalidTableReference(table_ref));
 				}
 
 				CallIndirect(signature, table_ref)
@@ -1221,14 +1221,14 @@ impl Deserialize for Instruction {
 			CURRENTMEMORY => {
 				let mem_ref: u8 = Uint8::deserialize(reader)?.into();
 				if mem_ref != 0 {
-					return Err(Error::InvalidMemoryReference(mem_ref))
+					return Err(Error::InvalidMemoryReference(mem_ref));
 				}
 				CurrentMemory(mem_ref)
 			},
 			GROWMEMORY => {
 				let mem_ref: u8 = Uint8::deserialize(reader)?.into();
 				if mem_ref != 0 {
-					return Err(Error::InvalidMemoryReference(mem_ref))
+					return Err(Error::InvalidMemoryReference(mem_ref));
 				}
 				GrowMemory(mem_ref)
 			},
@@ -1657,34 +1657,34 @@ fn deserialize_bulk<R: io::Read>(reader: &mut R) -> Result<Instruction, Error> {
 	Ok(Instruction::Bulk(match val {
 		MEMORY_INIT => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			MemoryInit(VarUint32::deserialize(reader)?.into())
 		},
 		MEMORY_DROP => MemoryDrop(VarUint32::deserialize(reader)?.into()),
 		MEMORY_FILL => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			MemoryFill
 		},
 		MEMORY_COPY => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			MemoryCopy
 		},
 
 		TABLE_INIT => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			TableInit(VarUint32::deserialize(reader)?.into())
 		},
 		TABLE_DROP => TableDrop(VarUint32::deserialize(reader)?.into()),
 		TABLE_COPY => {
 			if u8::from(Uint8::deserialize(reader)?) != 0 {
-				return Err(Error::UnknownOpcode(val))
+				return Err(Error::UnknownOpcode(val));
 			}
 			TableCopy
 		},
@@ -2925,55 +2925,59 @@ impl Serialize for InitExpr {
 	}
 }
 
-#[test]
-fn ifelse() {
-	// see if-else.wast/if-else.wasm
-	let instruction_list = super::deserialize_buffer::<Instructions>(&[
-		0x04, 0x7F, 0x41, 0x05, 0x05, 0x41, 0x07, 0x0B, 0x0B,
-	])
-	.expect("valid hex of if instruction");
-	let instructions = instruction_list.elements();
-	match instructions[0] {
-		Instruction::If(_) => (),
-		_ => panic!("Should be deserialized as if instruction"),
+#[cfg(test)]
+mod tests {
+	use super::*;
+	#[test]
+	fn ifelse() {
+		// see if-else.wast/if-else.wasm
+		let instruction_list = crate::elements::deserialize_buffer::<Instructions>(&[
+			0x04, 0x7F, 0x41, 0x05, 0x05, 0x41, 0x07, 0x0B, 0x0B,
+		])
+		.expect("valid hex of if instruction");
+		let instructions = instruction_list.elements();
+		match instructions[0] {
+			Instruction::If(_) => (),
+			_ => panic!("Should be deserialized as if instruction"),
+		}
+		let before_else = instructions
+			.iter()
+			.skip(1)
+			.take_while(|op| !matches!(**op, Instruction::Else))
+			.count();
+		let after_else = instructions
+			.iter()
+			.skip(1)
+			.skip_while(|op| !matches!(**op, Instruction::Else))
+			.take_while(|op| !matches!(**op, Instruction::End))
+			.count() - 1; // minus Instruction::Else itself
+		assert_eq!(before_else, after_else);
 	}
-	let before_else = instructions
-		.iter()
-		.skip(1)
-		.take_while(|op| !matches!(**op, Instruction::Else))
-		.count();
-	let after_else = instructions
-		.iter()
-		.skip(1)
-		.skip_while(|op| !matches!(**op, Instruction::Else))
-		.take_while(|op| !matches!(**op, Instruction::End))
-		.count() - 1; // minus Instruction::Else itself
-	assert_eq!(before_else, after_else);
-}
 
-#[test]
-fn display() {
-	let instruction = Instruction::GetLocal(0);
-	assert_eq!("get_local 0", format!("{}", instruction));
+	#[test]
+	fn display() {
+		let instruction = Instruction::GetLocal(0);
+		assert_eq!("get_local 0", format!("{}", instruction));
 
-	let instruction = Instruction::F64Store(0, 24);
-	assert_eq!("f64.store offset=24", format!("{}", instruction));
+		let instruction = Instruction::F64Store(0, 24);
+		assert_eq!("f64.store offset=24", format!("{}", instruction));
 
-	let instruction = Instruction::I64Store(0, 0);
-	assert_eq!("i64.store", format!("{}", instruction));
-}
+		let instruction = Instruction::I64Store(0, 0);
+		assert_eq!("i64.store", format!("{}", instruction));
+	}
 
-#[test]
-fn size_off() {
-	assert!(::std::mem::size_of::<Instruction>() <= 24);
-}
+	#[test]
+	fn size_off() {
+		assert!(::core::mem::size_of::<Instruction>() <= 24);
+	}
 
-#[test]
-fn instructions_hashset() {
-	use self::Instruction::{Block, Call, Drop};
-	use super::types::{BlockType::Value, ValueType};
+	#[test]
+	fn instructions_hashset() {
+		use self::Instruction::{Block, Call, Drop};
+		use crate::elements::types::{BlockType::Value, ValueType};
 
-	let set: std::collections::HashSet<Instruction> =
-		vec![Call(1), Block(Value(ValueType::I32)), Drop].into_iter().collect();
-	assert!(set.contains(&Drop));
+		let set: hashbrown::HashSet<Instruction> =
+			vec![Call(1), Block(Value(ValueType::I32)), Drop].into_iter().collect();
+		assert!(set.contains(&Drop));
+	}
 }

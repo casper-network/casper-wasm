@@ -113,7 +113,7 @@ impl Deserialize for ElementSegment {
 		} else if flags == FLAG_MEM_NONZERO {
 			VarUint32::deserialize(reader)?.into()
 		} else {
-			return Err(Error::InvalidSegmentFlags(flags))
+			return Err(Error::InvalidSegmentFlags(flags));
 		};
 		let offset =
 			if flags == FLAG_PASSIVE { None } else { Some(InitExpr::deserialize(reader)?) };
@@ -250,7 +250,7 @@ impl Deserialize for DataSegment {
 		} else if flags == FLAG_MEM_NONZERO {
 			VarUint32::deserialize(reader)?.into()
 		} else {
-			return Err(Error::InvalidSegmentFlags(flags))
+			return Err(Error::InvalidSegmentFlags(flags));
 		};
 		let offset =
 			if flags == FLAG_PASSIVE { None } else { Some(InitExpr::deserialize(reader)?) };
@@ -284,7 +284,9 @@ impl Serialize for DataSegment {
 		}
 
 		let value = self.value;
-		VarUint32::from(value.len()).serialize(writer)?;
+		VarUint32::try_from(value.len())
+			.map_err(|_| Error::InvalidVarUint32)?
+			.serialize(writer)?;
 		writer.write(&value[..])?;
 		Ok(())
 	}
