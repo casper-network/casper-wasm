@@ -53,3 +53,11 @@ bulk = []
 # Multi-value
 # https://github.com/WebAssembly/multi-value/
 multi_value = []
+
+# Call-indirect-overlong
+# A subset of the reference-types feature that contains just the
+# change to the call_indirect instruction encoding to change the
+# zero byte to an LEB encoding which may have an overlong encoding.
+# https://github.com/WebAssembly/reference-types/
+# https://github.com/WebAssembly/tool-conventions/blob/main/Lime.md
+call_indirect_overlong = []

@@ -41,6 +41,29 @@ impl TryFrom<usize> for VarUint32 {
 	}
 }
 
+impl VarUint32 {
+    /// Deserialize a LEB128‐encoded u32 with the leading byte already having been read.
+	pub fn deserialize_with_first<R: io::Read>(
+		reader: &mut R,
+		byte: u8,
+	) -> Result<Self, Error> {
+		let mut result = (byte & 0x7F) as u32;
+        let mut shift = 7;
+        loop {
+            let byte: u8 = Uint8::deserialize(reader)?.into();
+            result |= ((byte & 0x7F) as u32) << shift;
+            if shift >= 25 && (byte >> (32 - shift)) != 0 {
+                return Err(Error::InvalidVarUint32);
+            }
+            shift += 7;
+            if (byte & 0x80) == 0 {
+                break;
+            }
+        }
+        Ok(VarUint32(result))
+	}
+}
+
 impl Deserialize for VarUint32 {
 	type Error = Error;
 
