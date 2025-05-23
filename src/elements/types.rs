@@ -224,16 +224,12 @@ impl Serialize for FunctionType {
 	fn serialize<W: io::Write>(self, writer: &mut W) -> Result<(), Self::Error> {
 		VarUint7::from(self.form).serialize(writer)?;
 
-		let params_counted_list = CountedListWriter::<ValueType, _>(
-			self.params.len(),
-			self.params.into_iter(),
-		);
+		let params_counted_list =
+			CountedListWriter::<ValueType, _>(self.params.len(), self.params.into_iter());
 		params_counted_list.serialize(writer)?;
 
-		let results_counted_list = CountedListWriter::<ValueType, _>(
-			self.results.len(),
-			self.results.into_iter(),
-		);
+		let results_counted_list =
+			CountedListWriter::<ValueType, _>(self.results.len(), self.results.into_iter());
 		results_counted_list.serialize(writer)?;
 
 		Ok(())
