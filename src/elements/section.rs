@@ -344,7 +344,7 @@ impl Serialize for TypeSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<Type, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<Type, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -403,7 +403,7 @@ impl Serialize for ImportSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<ImportEntry, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<ImportEntry, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -491,7 +491,7 @@ impl Serialize for TableSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<TableType, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<TableType, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -534,7 +534,7 @@ impl Serialize for MemorySection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<MemoryType, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<MemoryType, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -577,7 +577,7 @@ impl Serialize for GlobalSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<GlobalEntry, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<GlobalEntry, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -620,7 +620,7 @@ impl Serialize for ExportSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<ExportEntry, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<ExportEntry, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -663,7 +663,7 @@ impl Serialize for CodeSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<FuncBody, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<FuncBody, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -706,7 +706,7 @@ impl Serialize for ElementSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<ElementSegment, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<ElementSegment, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())
@@ -749,7 +749,7 @@ impl Serialize for DataSection {
 		let mut counted_writer = CountedWriter::new(writer);
 		let data = self.0;
 		let counted_list =
-			CountedListWriter::<DataSegment, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<DataSegment, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 		counted_writer.done()?;
 		Ok(())

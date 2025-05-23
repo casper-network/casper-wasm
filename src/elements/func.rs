@@ -155,7 +155,7 @@ impl Serialize for FuncBody {
 
 		let data = self.locals;
 		let counted_list =
-			CountedListWriter::<Local, _>(data.len(), data.into_iter().map(Into::into));
+			CountedListWriter::<Local, _>(data.len(), data.into_iter());
 		counted_list.serialize(&mut counted_writer)?;
 
 		let code = self.instructions;

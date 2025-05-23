@@ -226,13 +226,13 @@ impl Serialize for FunctionType {
 
 		let params_counted_list = CountedListWriter::<ValueType, _>(
 			self.params.len(),
-			self.params.into_iter().map(Into::into),
+			self.params.into_iter(),
 		);
 		params_counted_list.serialize(writer)?;
 
 		let results_counted_list = CountedListWriter::<ValueType, _>(
 			self.results.len(),
-			self.results.into_iter().map(Into::into),
+			self.results.into_iter(),
 		);
 		results_counted_list.serialize(writer)?;
 
