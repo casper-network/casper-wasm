@@ -122,7 +122,7 @@ pub enum Instruction {
 	Return,
 
 	Call(u32),
-	CallIndirect(u32, u8),
+	CallIndirect(u32, u32),
 
 	Drop,
 	Select,
@@ -1087,10 +1087,26 @@ impl Deserialize for Instruction {
 			CALL => Call(VarUint32::deserialize(reader)?.into()),
 			CALLINDIRECT => {
 				let signature: u32 = VarUint32::deserialize(reader)?.into();
-				let table_ref: u8 = Uint8::deserialize(reader)?.into();
-				if table_ref != 0 {
-					return Err(Error::InvalidTableReference(table_ref));
-				}
+				let table_ref_lead: u8 = Uint8::deserialize(reader)?.into();
+
+				#[cfg(feature = "call_indirect_overlong")]
+				let table_ref = if table_ref_lead & 0x80 == 0 {
+					// If the most significant bit is not set, this is old
+					// behavior where the leading byte is the table reference
+					u32::from(table_ref_lead)
+				} else {
+					// Otherwise, the leading byte represents the length of the
+					// table reference to load as VarInt
+					VarUint32::deserialize_with_first(reader, table_ref_lead)?.into()
+				};
+
+				#[cfg(not(feature = "call_indirect_overlong"))]
+				let table_ref = {
+					if table_ref_lead != 0 {
+						return Err(Error::InvalidTableReference(table_ref_lead));
+					}
+					u32::from(table_ref_lead)
+				};
 
 				CallIndirect(signature, table_ref)
 			},
@@ -1783,7 +1799,7 @@ impl Serialize for Instruction {
 			}),
 			CallIndirect(index, reserved) => op!(writer, CALLINDIRECT, {
 				VarUint32::from(index).serialize(writer)?;
-				Uint8::from(reserved).serialize(writer)?;
+				VarUint32::from(reserved).serialize(writer)?;
 			}),
 			Drop => op!(writer, DROP),
 			Select => op!(writer, SELECT),

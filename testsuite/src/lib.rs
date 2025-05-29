@@ -4,10 +4,12 @@ use std::ffi::OsStr;
 
 mod run;
 
-const BASIC_BLACKLIST: [&str; 2] = [
+const BASIC_BLACKLIST: [&str; 3] = [
 	// those use unsupported i32_trunc_sat_* instructions
 	"binary-leb128.wast",
 	"conversions.wast",
+	// this is valid with call_indirect_overlong enabled
+	"binary.wast",
 ];
 
 #[test_generator::test_resources("testsuite/spec/*.wast")]
